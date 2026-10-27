@@ -2,7 +2,7 @@
 -- Усі таблиці створюються з IF NOT EXISTS, тому init_db() безпечно викликати при кожному запуску.
 -- Якщо змінюєте СТРУКТУРУ вже існуючої таблиці, видаліть локальний db.sqlite і перезапустіть застосунок.
 
--- Відгуки користувачів (відповідальний: Марчук)
+-- Відгуки користувачів
 CREATE TABLE IF NOT EXISTS feedback (
     id         INTEGER PRIMARY KEY AUTOINCREMENT,
     name       TEXT NOT NULL,
@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS feedback (
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- Товари меню (відповідальний: Кубський)
+-- Товари меню
 CREATE TABLE IF NOT EXISTS products (
     id           INTEGER PRIMARY KEY AUTOINCREMENT,
     name         TEXT NOT NULL,
@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS products (
     is_available INTEGER NOT NULL DEFAULT 1 CHECK (is_available IN (0, 1))
 );
 
--- Клієнти (відповідальний: Систалюк, рівень 2)
+-- Клієнти
 CREATE TABLE IF NOT EXISTS customers (
     id         INTEGER PRIMARY KEY AUTOINCREMENT,
     name       TEXT NOT NULL,
@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS customers (
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- Замовлення (відповідальний: Мельник)
+-- Замовлення
 -- Клієнта з замовленнями видалити не можна (RESTRICT): це захищає цілісність даних.
 CREATE TABLE IF NOT EXISTS orders (
     id          INTEGER PRIMARY KEY AUTOINCREMENT,

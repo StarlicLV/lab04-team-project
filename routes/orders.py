@@ -1,4 +1,4 @@
-"""Замовлення (Мельник): оформлення з кошика, статуси, промокоди (рівень 3), адмінка.
+"""Замовлення: оформлення з кошика, статуси, промокоди (рівень 3), адмінка.
 
 Кошик читається з session['cart'] = {product_id: quantity}. Статуси — models.ORDER_STATUSES.
 """
@@ -9,9 +9,9 @@ bp = Blueprint('orders', __name__)
 
 @bp.route('/checkout')
 def checkout():
-    return render_template('placeholder.html', title='Оформлення замовлення', owner='Мельник')
+    return render_template('placeholder.html', title='Оформлення замовлення', owner='...')
 
 
 @bp.route('/admin/orders')
 def admin_orders():
-    return render_template('admin/placeholder.html', title='Замовлення', owner='Мельник')
+    return render_template('admin/placeholder.html', title='Замовлення', owner='...')
