@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}Оформлення замовлення{% endblock %}
+
+{% block content %}
+<h1 class="text-3xl font-bold text-amber-900 dark:text-amber-200 mb-6">Оформлення замовлення</h1>
+
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <div class="mb-6 space-y-2">
+        {% for message in messages %}
+        <div class="rounded-lg bg-amber-100 px-4 py-3 text-amber-900 dark:bg-gray-800 dark:text-amber-200">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+{% endwith %}
+
+{% if errors.general %}
+<div class="mb-6 rounded-lg bg-red-100 px-4 py-3 text-red-800 dark:bg-red-950 dark:text-red-200">{{ errors.general }}</div>
+{% endif %}
+
+<div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
+
+    <!-- Склад кошика -->
+    <section class="rounded-lg bg-white p-5 shadow-md dark:bg-gray-800">
+        <h2 class="mb-4 text-xl font-semibold text-amber-900 dark:text-amber-200">Ваше замовлення</h2>
+        <table class="w-full text-left">
+            <thead>
+                <tr class="border-b border-stone-200 text-sm text-stone-500 dark:border-gray-700 dark:text-stone-400">
+                    <th class="py-2">Товар</th>
+                    <th class="py-2 text-right">К-сть</th>
+                    <th class="py-2 text-right">Сума</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for line in lines %}
+                <tr class="border-b border-stone-100 dark:border-gray-700">
+                    <td class="py-2">
+                        {{ line.product.name }}
+                        <div class="text-sm text-stone-500 dark:text-stone-400">{{ '%.2f'|format(line.product.price) }} грн</div>
+                    </td>
+                    <td class="py-2 text-right">{{ line.quantity }}</td>
+                    <td class="py-2 text-right">{{ '%.2f'|format(line.line_total) }} грн</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <dl class="mt-4 space-y-1 text-right">
+            <div class="flex justify-between text-stone-600 dark:text-stone-300">
+                <dt>Сума</dt><dd>{{ '%.2f'|format(subtotal) }} грн</dd>
+            </div>
+            {% if promo %}
+            <div class="flex justify-between text-green-700 dark:text-green-400">
+                <dt>Промокод {{ promo.code }} (−{{ promo.discount_percent }}%)</dt>
+                <dd>−{{ '%.2f'|format(discount) }} грн</dd>
+            </div>
+            {% endif %}
+            <div class="flex justify-between border-t border-stone-200 pt-2 text-xl font-bold text-amber-900 dark:border-gray-700 dark:text-amber-200">
+                <dt>До сплати</dt><dd>{{ '%.2f'|format(total) }} грн</dd>
+            </div>
+        </dl>
+    </section>
+
+    <!-- Форма -->
+    <section class="rounded-lg bg-white p-5 shadow-md dark:bg-gray-800">
+        <h2 class="mb-4 text-xl font-semibold text-amber-900 dark:text-amber-200">Ваші дані</h2>
+        <form method="post" action="{{ url_for('orders.checkout') }}" class="space-y-4" novalidate>
+
+            {% set input_cls = 'mt-1 w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-amber-600 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100' %}
+
+            <div>
+                <label for="name" class="block font-medium">Ім’я *</label>
+                <input id="name" name="name" type="text" value="{{ form.name }}" class="{{ input_cls }}">
+                {% if errors.name %}<p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ errors.name }}</p>{% endif %}
+            </div>
+
+            <div>
+                <label for="phone" class="block font-medium">Телефон *</label>
+                <input id="phone" name="phone" type="tel" placeholder="+380501112233" value="{{ form.phone }}" class="{{ input_cls }}">
+                {% if errors.phone %}<p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ errors.phone }}</p>{% endif %}
+            </div>
+
+            <div>
+                <label for="email" class="block font-medium">Email <span class="text-sm text-stone-500 dark:text-stone-400">(необов’язково)</span></label>
+                <input id="email" name="email" type="email" value="{{ form.email }}" class="{{ input_cls }}">
+                {% if errors.email %}<p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ errors.email }}</p>{% endif %}
+            </div>
+
+            <div>
+                <label for="address" class="block font-medium">Адреса доставки *</label>
+                <input id="address" name="address" type="text" value="{{ form.address }}" class="{{ input_cls }}">
+                {% if errors.address %}<p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ errors.address }}</p>{% endif %}
+            </div>
+
+            <div>
+                <label for="comment" class="block font-medium">Коментар</label>
+                <textarea id="comment" name="comment" rows="3" class="{{ input_cls }}">{{ form.comment }}</textarea>
+            </div>
+
+            <div>
+                <label for="promo_code" class="block font-medium">Промокод</label>
+                <div class="flex gap-2">
+                    <input id="promo_code" name="promo_code" type="text" value="{{ form.promo_code }}" class="{{ input_cls }} uppercase">
+                    <button type="submit" name="action" value="apply"
+                            class="mt-1 cursor-pointer rounded-lg bg-stone-200 px-4 py-2 transition-colors hover:bg-stone-300 dark:bg-gray-700 dark:hover:bg-gray-600">
+                        Застосувати
+                    </button>
+                </div>
+                {% if errors.promo_code %}<p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ errors.promo_code }}</p>{% endif %}
+            </div>
+
+            <button type="submit" name="action" value="order"
+                    class="w-full cursor-pointer rounded-lg bg-amber-700 px-4 py-3 font-semibold text-white transition-colors hover:bg-amber-800">
+                Підтвердити замовлення
+            </button>
+        </form>
+    </section>
+</div>
+{% endblock %}

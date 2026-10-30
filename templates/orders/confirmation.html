@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Замовлення №{{ order.id }} оформлено{% endblock %}
+
+{% block content %}
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <div class="mb-6 space-y-2">
+        {% for message in messages %}
+        <div class="rounded-lg bg-amber-100 px-4 py-3 text-amber-900 dark:bg-gray-800 dark:text-amber-200">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+{% endwith %}
+
+<div class="mx-auto max-w-2xl rounded-lg bg-white p-6 shadow-md dark:bg-gray-800">
+    <h1 class="text-3xl font-bold text-amber-900 dark:text-amber-200">Дякуємо за замовлення! ☕</h1>
+    <p class="mt-2 text-lg">Номер вашого замовлення: <span class="font-bold">№{{ order.id }}</span></p>
+    <p class="text-stone-600 dark:text-stone-300">Статус: {{ statuses[order.status] }}</p>
+
+    <dl class="mt-4 space-y-1 text-stone-700 dark:text-stone-200">
+        <div><dt class="inline font-medium">Клієнт: </dt><dd class="inline">{{ order.customer_name }}, {{ order.customer_phone }}</dd></div>
+        <div><dt class="inline font-medium">Адреса: </dt><dd class="inline">{{ order.address }}</dd></div>
+        {% if order.comment %}
+        <div><dt class="inline font-medium">Коментар: </dt><dd class="inline">{{ order.comment }}</dd></div>
+        {% endif %}
+    </dl>
+
+    <table class="mt-6 w-full text-left">
+        <thead>
+            <tr class="border-b border-stone-200 text-sm text-stone-500 dark:border-gray-700 dark:text-stone-400">
+                <th class="py-2">Товар</th>
+                <th class="py-2 text-right">К-сть</th>
+                <th class="py-2 text-right">Ціна</th>
+                <th class="py-2 text-right">Сума</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr class="border-b border-stone-100 dark:border-gray-700">
+                <td class="py-2">{{ item.name }}</td>
+                <td class="py-2 text-right">{{ item.quantity }}</td>
+                <td class="py-2 text-right">{{ '%.2f'|format(item.price_at_order) }}</td>
+                <td class="py-2 text-right">{{ '%.2f'|format(item.line_total) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="mt-4 space-y-1 text-right">
+        {% if order.promo_code %}
+        <div class="text-green-700 dark:text-green-400">Промокод {{ order.promo_code }}: −{{ '%.2f'|format(order.discount) }} грн</div>
+        {% endif %}
+        <div class="text-xl font-bold text-amber-900 dark:text-amber-200">Разом: {{ '%.2f'|format(order.total) }} грн</div>
+    </div>
+
+    <a href="{{ menu_url }}"
+       class="mt-6 inline-block rounded-lg bg-amber-700 px-4 py-2 text-white transition-colors hover:bg-amber-800">
+        Повернутися до меню
+    </a>
+</div>
+{% endblock %}
