@@ -40,6 +40,8 @@ CREATE TABLE IF NOT EXISTS orders (
     address     TEXT NOT NULL DEFAULT '',
     comment     TEXT NOT NULL DEFAULT '',
     total       REAL NOT NULL DEFAULT 0,
+    promo_code  TEXT,                          -- застосований промокод (може бути порожнім)
+    discount    REAL NOT NULL DEFAULT 0,       -- сума знижки в грн
     created_at  TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -53,3 +55,14 @@ CREATE TABLE IF NOT EXISTS order_items (
     quantity       INTEGER NOT NULL CHECK (quantity > 0),
     price_at_order REAL NOT NULL
 );
+
+-- Промокоди (рівень 3): знижка у відсотках на суму замовлення
+CREATE TABLE IF NOT EXISTS promo_codes (
+    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+    code             TEXT NOT NULL UNIQUE,
+    discount_percent INTEGER NOT NULL CHECK (discount_percent BETWEEN 1 AND 100),
+    is_active        INTEGER NOT NULL DEFAULT 1 CHECK (is_active IN (0, 1))
+);
+
+-- Тестовий промокод для перевірки (додається лише якщо його ще немає)
+INSERT OR IGNORE INTO promo_codes (code, discount_percent) VALUES ('WELCOME10', 10);
