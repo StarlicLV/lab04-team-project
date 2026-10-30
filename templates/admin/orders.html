@@ -1,0 +1,69 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Замовлення{% endblock %}
+
+{% block admin_content %}
+{% include "admin/_orders_nav.html" %}
+
+<h2 class="mb-4 text-2xl font-bold">Замовлення</h2>
+
+<!-- Фільтр за статусом (параметр GET ?status=) -->
+<div class="mb-4 flex flex-wrap gap-2">
+    <a href="{{ url_for('orders.admin_orders') }}"
+       class="rounded-full px-3 py-1 text-sm {{ 'bg-amber-700 text-white' if not current_status else 'bg-white text-amber-900 hover:bg-amber-100 dark:bg-gray-800 dark:text-amber-200 dark:hover:bg-gray-700' }}">
+        Усі
+    </a>
+    {% for key, label in statuses.items() %}
+    <a href="{{ url_for('orders.admin_orders', status=key) }}"
+       class="rounded-full px-3 py-1 text-sm {{ 'bg-amber-700 text-white' if current_status == key else 'bg-white text-amber-900 hover:bg-amber-100 dark:bg-gray-800 dark:text-amber-200 dark:hover:bg-gray-700' }}">
+        {{ label }}
+    </a>
+    {% endfor %}
+</div>
+
+{% if orders %}
+<div class="overflow-x-auto rounded-lg bg-white shadow-md dark:bg-gray-800">
+    <table class="w-full text-left">
+        <thead>
+            <tr class="border-b border-stone-200 text-sm text-stone-500 dark:border-gray-700 dark:text-stone-400">
+                <th class="px-4 py-3">№</th>
+                <th class="px-4 py-3">Клієнт</th>
+                <th class="px-4 py-3">Статус</th>
+                <th class="px-4 py-3 text-right">Сума</th>
+                <th class="px-4 py-3">Дата</th>
+                <th class="px-4 py-3"></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr class="border-b border-stone-100 dark:border-gray-700">
+                <td class="px-4 py-3 font-semibold">{{ order.id }}</td>
+                <td class="px-4 py-3">
+                    {{ order.customer_name }}
+                    <div class="text-sm text-stone-500 dark:text-stone-400">{{ order.customer_phone }}</div>
+                </td>
+                <td class="px-4 py-3">
+                    {% set badge = {
+                        'new': 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-200',
+                        'preparing': 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-200',
+                        'delivering': 'bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-200',
+                        'done': 'bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-200',
+                        'cancelled': 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-200'
+                    } %}
+                    <span class="rounded-full px-3 py-1 text-sm {{ badge[order.status] }}">{{ statuses[order.status] }}</span>
+                </td>
+                <td class="px-4 py-3 text-right">{{ '%.2f'|format(order.total) }} грн</td>
+                <td class="px-4 py-3 text-sm">{{ order.created_at }}</td>
+                <td class="px-4 py-3 text-right">
+                    <a href="{{ url_for('orders.admin_order_detail', order_id=order.id) }}"
+                       class="text-amber-800 underline hover:text-amber-600 dark:text-amber-300">Відкрити</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<p class="text-stone-600 dark:text-stone-300">Замовлень не знайдено.</p>
+{% endif %}
+{% endblock %}

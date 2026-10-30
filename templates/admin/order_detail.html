@@ -1,0 +1,76 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Замовлення №{{ order.id }}{% endblock %}
+
+{% block admin_content %}
+{% include "admin/_orders_nav.html" %}
+
+<a href="{{ url_for('orders.admin_orders') }}" class="text-sm text-amber-800 underline dark:text-amber-300">← До списку замовлень</a>
+<h2 class="mb-4 mt-2 text-2xl font-bold">Замовлення №{{ order.id }}</h2>
+
+<div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+
+    <section class="rounded-lg bg-white p-5 shadow-md dark:bg-gray-800 lg:col-span-2">
+        <table class="w-full text-left">
+            <thead>
+                <tr class="border-b border-stone-200 text-sm text-stone-500 dark:border-gray-700 dark:text-stone-400">
+                    <th class="py-2">Товар</th>
+                    <th class="py-2 text-right">К-сть</th>
+                    <th class="py-2 text-right">Ціна на момент замовлення</th>
+                    <th class="py-2 text-right">Сума</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr class="border-b border-stone-100 dark:border-gray-700">
+                    <td class="py-2">{{ item.name }}</td>
+                    <td class="py-2 text-right">{{ item.quantity }}</td>
+                    <td class="py-2 text-right">{{ '%.2f'|format(item.price_at_order) }}</td>
+                    <td class="py-2 text-right">{{ '%.2f'|format(item.line_total) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="mt-4 space-y-1 text-right">
+            {% if order.promo_code %}
+            <div class="text-green-700 dark:text-green-400">Промокод {{ order.promo_code }}: −{{ '%.2f'|format(order.discount) }} грн</div>
+            {% endif %}
+            <div class="text-xl font-bold text-amber-900 dark:text-amber-200">Разом: {{ '%.2f'|format(order.total) }} грн</div>
+        </div>
+    </section>
+
+    <aside class="space-y-6">
+        <section class="rounded-lg bg-white p-5 shadow-md dark:bg-gray-800">
+            <h3 class="mb-2 text-lg font-semibold">Клієнт і доставка</h3>
+            <dl class="space-y-1 text-sm">
+                <div><dt class="inline font-medium">Ім’я: </dt><dd class="inline">{{ order.customer_name }}</dd></div>
+                <div><dt class="inline font-medium">Телефон: </dt><dd class="inline">{{ order.customer_phone }}</dd></div>
+                {% if order.customer_email %}
+                <div><dt class="inline font-medium">Email: </dt><dd class="inline">{{ order.customer_email }}</dd></div>
+                {% endif %}
+                <div><dt class="inline font-medium">Адреса: </dt><dd class="inline">{{ order.address }}</dd></div>
+                {% if order.comment %}
+                <div><dt class="inline font-medium">Коментар: </dt><dd class="inline">{{ order.comment }}</dd></div>
+                {% endif %}
+                <div><dt class="inline font-medium">Створено: </dt><dd class="inline">{{ order.created_at }}</dd></div>
+            </dl>
+        </section>
+
+        <section class="rounded-lg bg-white p-5 shadow-md dark:bg-gray-800">
+            <h3 class="mb-2 text-lg font-semibold">Статус</h3>
+            <form method="post" action="{{ url_for('orders.update_status', order_id=order.id) }}" class="flex gap-2">
+                <select name="status"
+                        class="w-full rounded-lg border border-stone-300 bg-white px-3 py-2 dark:border-gray-600 dark:bg-gray-900">
+                    {% for key, label in statuses.items() %}
+                    <option value="{{ key }}" {{ 'selected' if key == order.status }}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit"
+                        class="cursor-pointer rounded-lg bg-amber-700 px-4 py-2 text-white transition-colors hover:bg-amber-800">
+                    Зберегти
+                </button>
+            </form>
+        </section>
+    </aside>
+</div>
+{% endblock %}
