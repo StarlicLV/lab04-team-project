@@ -5,8 +5,8 @@
 **Склад команди:**
 - Систалюк Артем: каркас проєкту, клієнти
 - Кубський Максим: частина А (відгуки та кошик)
-- Марчук Максим: _(вкажіть свою частину)_
-- Мельник Віталій: _(вкажіть свою частину)_
+- Марчук Максим: частина Б (товари та пошук)
+- Мельник Віталій: частина В (замовлення та промокоди)
 
 **Тема проєкту:** кав'ярня з десертами
 
@@ -30,11 +30,34 @@
 
 Усі SQL-запити параметризовані (`?`), зміни даних робляться через `execute_db`. Шаблони підтримують темну тему (`dark:`).
 
-**Мої коміти:** _(вставте посилання на свої коміти з GitHub, наприклад `https://github.com/StarlicLV/lab04-team-project/commits/feature/feedback`)_
+**Мої коміти:** (https://github.com/StarlicLV/lab04-team-project/commits/feature/feedback)
 
 ## Схема бази даних
 
-_(вставте спільну схему: таблиці `feedback`, `products`, `customers`, `orders`, `order_items`, ключі та зв'язки, а також скриншоти адмін-панелі, зокрема розділу «Відгуки»)_
+База даних SQLite, схема описана у файлі schema.sql. Таблиць п'ять.
+
+Таблиця	Поля	Призначення
+feedback	id (PK), name, email, message, created_at	відгуки відвідувачів
+products	id (PK), name, description, price (≥ 0), category, is_available (0 або 1)	товари меню
+customers	id (PK), name, phone (UNIQUE), email, created_at	клієнти
+orders	id (PK), customer_id (FK), status, address, comment, total, created_at	замовлення
+order_items	id (PK), order_id (FK), product_id (FK), quantity (> 0), price_at_order	позиції замовлення
+
+Первинні ключі. У кожній таблиці це поле id типу INTEGER PRIMARY KEY AUTOINCREMENT, яке база заповнює сама.
+
+Зв'язки.
+
+customers 1 → N orders: один клієнт має багато замовлень (orders.customer_id → customers.id, ON DELETE RESTRICT: клієнта із замовленнями видалити не можна).
+orders 1 → N order_items: одне замовлення містить багато позицій (order_items.order_id → orders.id, ON DELETE CASCADE: разом із замовленням видаляються його позиції).
+products 1 → N order_items (order_items.product_id → products.id, ON DELETE RESTRICT: товар, який є в замовленнях, видалити не можна, його вимикають через is_available = 0).
+Між orders і products виходить зв'язок «багато-до-багатьох», а таблиця order_items є сполучною.
+Таблиця feedback з іншими не пов'язана.
+
+Обмеження. status приймає лише new, preparing, delivering, done, cancelled. customers.phone унікальний. price_at_order зберігає ціну на момент замовлення, щоб зміна ціни товару пізніше не змінила старі замовлення.
+
+ ![Відгуки в адмінці](admin-feedback.png)
+ ![Кошик](cart.png)
+ ![Форма з помилками](feedback-errors.png)
 
 ## Труднощі й як їх вирішено
 
