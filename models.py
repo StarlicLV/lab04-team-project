@@ -69,12 +69,29 @@ def execute_db(sql, args=()):
     cursor.close()
     return last_id
 
+# Колонки, додані до вже існуючих таблиць після першого релізу схеми.
+# CREATE TABLE IF NOT EXISTS не змінює стару таблицю, тому додаємо їх через ALTER TABLE.
+MIGRATIONS = [
+    ('orders', 'promo_code', 'TEXT'),
+    ('orders', 'discount', 'REAL NOT NULL DEFAULT 0'),
+]
+
+
+def migrate_db(db):
+    """Додає відсутні колонки в старий db.sqlite, не видаляючи наявні дані."""
+    for table, column, definition in MIGRATIONS:
+        columns = [row[1] for row in db.execute(f'PRAGMA table_info({table})')]
+        if columns and column not in columns:
+            db.execute(f'ALTER TABLE {table} ADD COLUMN {column} {definition}')
+    db.commit()
+
 
 def init_db():
-    """Створює таблиці зі schema.sql і додає тестові дані, якщо таблиці порожні."""
+    """Створює таблиці зі schema.sql, оновлює стару схему і додає тестові дані, якщо таблиці порожні."""
     db = get_db()
     with current_app.open_resource('schema.sql') as f:
         db.executescript(f.read().decode('utf-8'))
+    migrate_db(db)
 
     if db.execute('SELECT COUNT(*) FROM products').fetchone()[0] == 0:
         db.executemany(
